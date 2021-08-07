@@ -67,7 +67,6 @@
       };
 
       function sendDataLayerScore(score, highScore, gameNumber) {
-        console.log(score, highScore, gameNumber);
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({
           event: "gameScore",
@@ -159,9 +158,6 @@
         margin: 0 auto;
         width: 80%;
       }
-      #slider {
-        margin: 0 auto;
-      }
       #game {
         margin: 0 auto;
       }
@@ -209,9 +205,6 @@
           class="game-element"
         ></meter>
         <canvas id="game" class="game-element"></canvas>
-        <!-- <div class="slidecontainer">
-          <input type="range" min="0" max="10" value="2" class="slider" id="lockdownRange" />
-        </div> -->
         <!-- <div id="footer">
           <div class="content">
             Please consider
@@ -253,8 +246,6 @@
         </script>
       </div>
     </div>
-
-    <script src="scripts/canvasslider.js"></script>
-    <script src="scripts/game.js"></script>
+    <script src="dist/main.js"></script>
   </body>
 </html>
