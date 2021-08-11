@@ -1,5 +1,5 @@
 const covid = require("./covid");
-const globalGameValue = require("./globalGameValues");
+const globalGameValue = require("./gameStorage");
 const powerUps = require("./powerUps");
 const gameCanvas = document.getElementById("game");
 const ctx = gameCanvas.getContext("2d");
@@ -29,6 +29,9 @@ const controls = {
     spX: 416,
     spY: 187,
     scale: 5
+  },
+  lockdownSettings: {
+    lockdownMeterTimeIncrease: 0.2
   },
   smile: {
     startSpriteX: 377,
@@ -68,10 +71,11 @@ const controls = {
     const inLockdown = globalGameValue.lockdownMeter < 100;
     const happinessIncrease = multiplier * 0.001 * -1;
     const happinessLockdownMult = inLockdown ? happinessIncrease * 0.1 : happinessIncrease;
-    if (globalGameValue.lockdownMeter < 100) globalGameValue.lockdownMeter += 0.1;
+    if (globalGameValue.lockdownMeter < 100)
+      globalGameValue.lockdownMeter += this.lockdownSettings.lockdownMeterTimeIncrease;
     if (globalGameValue.happiness < 100) globalGameValue.happiness += happinessLockdownMult;
     if (powerUps.powerUps.elements.some(s => s.powerUpType === "scomo"))
-      globalGameValue.happiness -= 0.2;
+      globalGameValue.happiness -= powerUps.powerUps.types.scomo.happinessDecrease;
   },
   draw: function () {
     // Draw lockdown button and meter
@@ -171,10 +175,10 @@ const controls = {
     );
     // Draw Smile
     const getSpriteY = () => {
-      if (globalGameValue.happiness < 10) return 5;
-      else if (globalGameValue.happiness < 25) return 4;
-      else if (globalGameValue.happiness < 40) return 3;
-      else if (globalGameValue.happiness < 50) return 2;
+      if (globalGameValue.happiness < 15) return 5;
+      else if (globalGameValue.happiness < 30) return 4;
+      else if (globalGameValue.happiness < 45) return 3;
+      else if (globalGameValue.happiness < 55) return 2;
       else if (globalGameValue.happiness < 75) return 1;
       else return 0;
     };

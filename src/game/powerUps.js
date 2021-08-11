@@ -13,6 +13,7 @@ const powerUps = {
   spY: 0,
   types: {
     scomo: {
+      happinessDecrease: 0.1,
       spX: 360
     },
     brett: {

@@ -1,7 +1,7 @@
 const { covid } = require("./game/covid");
 const { controls } = require("./game/controls");
 const { powerUps } = require("./game/powerUps");
-const globalGameValue = require("./game/globalGameValues");
+const globalGameValue = require("./game/gameStorage");
 const { ranArr, ranInt, removeItemFromArray } = require("./helpers");
 var gameCanvas = document.getElementById("game");
 var ctx = gameCanvas.getContext("2d");
@@ -15,7 +15,6 @@ SCOMOSFX.src = `audio/scomo.wav`;
 const breachMessages = ["HOTEL QURANTINE BREACH!", "INTERSTATE ARRIVAL!", "REMOVALISTS!"];
 
 function resetGame() {
-  console.log("Resetting game.");
   powerUps.reset();
   covid.reset();
   textElement.reset();
@@ -26,7 +25,7 @@ function resetGame() {
   globalGameValue.happiness = 100;
   globalGameValue.lockdownMeter = 100;
   globalGameValue.buttonState = "up";
-  console.log(globalGameValue);
+  initialCovid();
 }
 
 const HIT = new Audio();
@@ -93,8 +92,8 @@ gameCanvas.addEventListener("click", function (event) {
   covid.elements.some((element, i) => {
     if (ctx.isPointInPath(element.hitBox, event.offsetX, event.offsetY)) {
       removeItemFromArray(covid.elements, i);
-      // HIT.src = `audio/collect${ranInt(1, 10)}.wav`;
-      // HIT.play();
+      HIT.src = `audio/collect${ranInt(1, 10)}.wav`;
+      HIT.play();
       draw();
       return true;
     }
@@ -151,11 +150,21 @@ function createNewStrainChance() {
     const color = ranInt(0, 7) * covid.gridX;
     textElement.create(ranArr(breachMessages), x, y);
     covid.create(strainName, color, x, y);
-    // HIT.src = `audio/collect${ranInt(1, 10)}.wav`;
-    // HIT.play();
+    HIT.src = `audio/collect${ranInt(1, 10)}.wav`;
+    HIT.play();
     globalGameValue.missedCovidChance = 0;
   } else {
     globalGameValue.missedCovidChance += 1;
+  }
+}
+
+function initialCovid() {
+  const strainName = ranArr(Object.keys(covid.strains));
+  const color = ranInt(0, 7) * covid.gridX;
+  for (let i = 0; i <= 2; i += 1) {
+    const x = ranInt(covid.width, gameCanvas.width - covid.width);
+    const y = ranInt(covid.height, gameCanvas.height - covid.height - controls.height);
+    covid.create(strainName, color, x, y);
   }
 }
 
@@ -173,7 +182,8 @@ const gameOver = {
 function createPowerUpChance() {
   if (Math.random() > 1 * 0.9) {
     const powerupTypes = Object.keys(powerUps.types);
-    const powerUp = ranArr(powerupTypes);
+    // const powerUp = ranArr(powerupTypes);
+    const powerUp = "scomo"
     powerUps.create(powerUp);
     if (powerUp === "scomo") {
       SCOMOSFX.play();
@@ -208,7 +218,7 @@ setInterval(function () {
 }, 800);
 
 function update() {
-  controls.update();
+  if (globalGameValue.state === "play") controls.update();
   if (covid.elements.length > 100) {
     globalGameValue.state = "gameOverCovid";
   }
