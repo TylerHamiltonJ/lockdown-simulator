@@ -15,11 +15,11 @@ const covid = {
   gridY: 47,
   scale: 2,
   strains: {
-    alpha: { minRep: 0, maxRep: 1, ref: 1, sY: 44 * 1 },
-    beta: { minRep: 1, maxRep: 2, ref: 2, sY: 44 * 2 },
-    gamma: { minRep: 1, maxRep: 2, ref: 3, sY: 44 * 3 },
-    delta: { minRep: 1, maxRep: 4, ref: 5, sY: 44 * 0 },
-    lambda: { minRep: 1, maxRep: 3, ref: 4, sY: 44 * 4 }
+    alpha: { minRep: 0, maxRep: 1, ref: 1, sY: 44 * 1, cycleStart: 0 },
+    beta: { minRep: 1, maxRep: 2, ref: 2, sY: 44 * 2, cycleStart: 500 },
+    gamma: { minRep: 1, maxRep: 2, ref: 3, sY: 44 * 3, cycleStart: 1000 },
+    lambda: { minRep: 1, maxRep: 3, ref: 4, sY: 44 * 4, cycleStart: 1500 },
+    delta: { minRep: 1, maxRep: 4, ref: 5, sY: 44 * 0, cycleStart: 2000 }
   },
   draw: function () {
     this.elements.forEach(e => {

@@ -7,7 +7,7 @@ var gameCanvas = document.getElementById("game");
 var ctx = gameCanvas.getContext("2d");
 
 const gameOverImg = new Image();
-gameOverImg.src = "img/gameOver2.png";
+gameOverImg.src = "img/gameOver4.png";
 
 const SCOMOSFX = new Audio();
 SCOMOSFX.src = `audio/scomo.wav`;
@@ -79,13 +79,16 @@ const textElement = {
   }
 };
 
-// Listen for mouse click
-gameCanvas.addEventListener("click", function (event) {
+function click(event) {
+  console.log(globalGameValue.frame);
   if (globalGameValue.state !== "play") {
     resetGame();
   }
   // Check whether point is inside circle
-  if (ctx.isPointInPath(controls.buttonHitbox, event.offsetX, event.offsetY)) {
+  if (
+    ctx.isPointInPath(controls.buttonHitbox, event.offsetX, event.offsetY) ||
+    event.code === "Space"
+  ) {
     controls.lockdown();
   }
   // buttonHitbox
@@ -106,7 +109,23 @@ gameCanvas.addEventListener("click", function (event) {
       return true;
     }
   });
+}
+
+window.addEventListener("keydown", event => {
+  if (event.code === "Space") {
+    click(event);
+    globalGameValue.buttonState = "down";
+  }
 });
+
+window.addEventListener("keyup", event => {
+  if (event.code === "Space") {
+    globalGameValue.buttonState = "up";
+  }
+});
+
+// Listen for mouse click
+gameCanvas.addEventListener("click", click);
 
 function getTouches(e) {
   if (
@@ -126,7 +145,6 @@ function mouseDown(event) {
   const cords = getTouches(event);
   // Check whether point is inside circle
   if (ctx.isPointInPath(controls.buttonHitbox, cords.x, cords.y)) {
-    console.log("Button Down");
     globalGameValue.buttonState = "down";
   } else {
     globalGameValue.buttonState = "up";
@@ -146,7 +164,10 @@ function createNewStrainChance() {
   if (ran === 1 || globalGameValue.missedCovidChance > 7) {
     const x = ranInt(covid.width, gameCanvas.width - covid.width);
     const y = ranInt(covid.height, gameCanvas.height - covid.height - controls.height);
-    const strainName = ranArr(Object.keys(covid.strains));
+    const availableStrains = Object.keys(covid.strains).filter(
+      f => covid.strains[f].cycleStart <= globalGameValue.frame
+    );
+    const strainName = ranArr(availableStrains);
     const color = ranInt(0, 7) * covid.gridX;
     textElement.create(ranArr(breachMessages), x, y);
     covid.create(strainName, color, x, y);
@@ -159,7 +180,7 @@ function createNewStrainChance() {
 }
 
 function initialCovid() {
-  const strainName = ranArr(Object.keys(covid.strains));
+  const strainName = "alpha";
   const color = ranInt(0, 7) * covid.gridX;
   for (let i = 0; i <= 2; i += 1) {
     const x = ranInt(covid.width, gameCanvas.width - covid.width);
@@ -170,8 +191,9 @@ function initialCovid() {
 
 const gameOver = {
   draw: function () {
-    if (globalGameValue.state === "gameOverCovid") {
+    if (globalGameValue.state === "gameOverCovid" || globalGameValue.state === "gameOverProtest") {
       ctx.drawImage(gameOverImg, 0, 0, 800, 1159, 0, 0, gameCanvas.width, gameCanvas.height);
+      return true;
     }
     if (globalGameValue.state === "gameOverProtest") {
       ctx.drawImage(gameOverImg, 800, 0, 800, 1159, 0, 0, gameCanvas.width, gameCanvas.height);
@@ -179,11 +201,18 @@ const gameOver = {
   }
 };
 
+const background = {
+  draw: function () {
+
+    ctx.drawImage(gameOverImg, 1600, 0, 800, 1159, 0, 0, gameCanvas.width, gameCanvas.height);
+  }
+};
+
 function createPowerUpChance() {
   if (Math.random() > 1 * 0.9) {
     const powerupTypes = Object.keys(powerUps.types);
     // const powerUp = ranArr(powerupTypes);
-    const powerUp = "scomo"
+    const powerUp = "scomo";
     powerUps.create(powerUp);
     if (powerUp === "scomo") {
       SCOMOSFX.play();
@@ -194,6 +223,7 @@ function createPowerUpChance() {
 function loop() {
   draw();
   update();
+  background.draw();
   covid.draw();
   textElement.draw();
   covid.update();
@@ -219,9 +249,9 @@ setInterval(function () {
 
 function update() {
   if (globalGameValue.state === "play") controls.update();
-  if (covid.elements.length > 100) {
-    globalGameValue.state = "gameOverCovid";
-  }
+  // if (covid.elements.length > 100) {
+  //   globalGameValue.state = "gameOverCovid";
+  // }
   if (globalGameValue.happiness <= 0) {
     globalGameValue.state = "gameOverProtest";
   }
